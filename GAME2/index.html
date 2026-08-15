@@ -3,44 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Symphony Pose - Rhythm Game</title>
+    <title>Symphony Pose - Stretch Rhythm Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="header">
         <h1>Symphony Pose 🎵</h1>
-        <p>5 ท่าทาง | 3 เลน | ห้ามพลาดแม้แต่โน้ตเดียว!</p>
-    </div>
-
-    <div class="controls">
-        <button id="startBtn" onclick="init()">เริ่มเกม</button>
-        <button id="restartBtn" onclick="restartGame()" disabled>เริ่มใหม่</button>
-    </div>
-
-    <div class="status-board">
-        <div class="status-item">เวลา: <span id="timeDisplay">0.0</span> วินาที</div>
-        <div class="status-item">คะแนน: <span id="scoreDisplay">0</span></div>
-        <div class="status-item">ท่าทางปัจจุบัน: <span id="poseDisplay">-</span></div>
     </div>
 
     <div class="game-container">
-        <!-- กล้องเว็บแคม -->
-        <div class="camera-section">
-            <canvas id="cameraCanvas" width="300" height="300"></canvas>
-            <div id="loadingText">รอการเชื่อมต่อกล้อง...</div>
-        </div>
-
-        <!-- หน้าจอเกม -->
+        <!-- หน้าจอเกม + แถบป้ายสี่เหลี่ยมผืนผ้าด้านบน -->
         <div class="canvas-section">
-            <canvas id="gameCanvas" width="450" height="600"></canvas>
             
-            <!-- หน้าต่างสรุปผลตอน Game Over -->
-            <div id="gameOverScreen" class="overlay hidden">
-                <h2>GAME OVER!</h2>
-                <p>คุณทำท่าไม่ทัน หรือผิดท่า 😭</p>
-                <p>เวลาที่เล่นได้: <span id="finalTime">0</span> วินาที</p>
-                <p>คะแนนรวม: <span id="finalScore">0</span></p>
+            <!-- 📌 แถบป้ายสี่เหลี่ยมผืนผ้ายาว รวบทุกอย่างไว้ด้านบน -->
+            <div class="top-bar-panel">
+                <!-- 1. กล้องเว็บแคมย่อขนาด -->
+                <div class="camera-thumb">
+                    <canvas id="cameraCanvas" width="300" height="300"></canvas>
+                    <div id="loadingText">รอเชื่อมต่อกล้อง...</div>
+                </div>
+
+                <!-- 2. ข้อมูลคำอธิบายท่า และ สถานะเกม -->
+                <div class="panel-info">
+                    <!-- บรรทัดบน: คำอธิบายสีบาร์ -->
+                    <div class="legend-box">
+                        <span>🔴 ยืดแขนซ้าย</span>
+                        <span>🟡 ยืดชูสองมือ</span>
+                        <span>🔵 ยืดแขนขวา</span>
+                    </div>
+
+                    <!-- บรรทัดล่าง: สถานะเกมคะแนน/เวลา -->
+                    <div class="status-box">
+                        <div>เวลา: <span id="timeDisplay">0.0</span>s</div>
+                        <div>คะแนน: <span id="scoreDisplay">0</span></div>
+                        <div>ท่า: <span id="poseDisplay">-</span></div>
+                    </div>
+                </div>
             </div>
+
+            <!-- 📌 พื้นที่ canvas แสดงตัวเกม -->
+            <div class="game-view">
+                <canvas id="gameCanvas" width="450" height="600"></canvas>
+                
+                <!-- หน้าต่างเมนู/จบเกม -->
+                <div id="gameMenuScreen" class="overlay">
+                    <h2 id="menuTitle">พร้อมยืดเส้นหรือยัง?</h2>
+                    
+                    <div id="gameOverStats" class="hidden">
+                        <p>คุณทำท่ายืดเส้นไม่ทัน บาร์หมดไปแล้ว! 😭</p>
+                        <p>เวลาที่เล่นได้: <span id="finalTime">0</span> วินาที</p>
+                        <p>คะแนนรวม: <span id="finalScore">0</span></p>
+                    </div>
+
+                    <button id="mainActionBtn" onclick="handleMenuAction()">เริ่มเกม</button>
+                    <p id="menuLoadingText" class="hidden" style="color: #fee440; margin-top: 15px;">กำลังโหลดโมเดล... กรุณารอสักครู่</p>
+                </div>
+            </div>
+
         </div>
     </div>
 
