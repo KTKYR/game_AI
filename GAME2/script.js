@@ -1,21 +1,19 @@
 // ===============================
-// 1. การตั้งค่า Teachable Machine
+// 1. การตั้งค่า Teachable Machine & ท่าทาง
 // ===============================
-const MODEL_URL = "https://teachablemachine.withgoogle.com/models/rAHIczfw0/";
-const CONFIDENCE_LIMIT = 0.85;
+const MODEL_URL = "https://teachablemachine.withgoogle.com/models/qhYQpY7zf/"; // **นำ URL โมเดลของคุณมาใส่ที่นี่**
+const CONFIDENCE_LIMIT = 0.80; 
 
 let model, webcam, cameraCtx;
 let currentPose = "none";
 let isCameraReady = false;
+let isModelLoaded = false;
 
-// ตั้งค่าคลาสจาก Teachable Machine (ต้องพิมพ์ให้ตรงกับในเว็บเป๊ะๆ)
-const poses = {
-    LEFT_ARM: "ยืดแขนด้านซ้าย",
-    RIGHT_ARM: "ยืดแขนด้านขวา",
-    LEFT_NECK: "เอียงคอด้านซ้าย",
-    RIGHT_NECK: "เอียงคอด้านขวา",
-    CENTER_ARM: "ยืดแขนตรงๆ"
-};
+const POSE_MAP = [
+    { id: "red", color: "#ef233c", poseName: "left" },
+    { id: "yellow", color: "#fee440", poseName: "up" },
+    { id: "blue", color: "#00f5d4", poseName: "right" }
+];
 
 // ===============================
 // 2. ตัวแปรระบบเกม
@@ -30,20 +28,28 @@ let elapsedTime = 0;
 let frameCount = 0;
 
 const laneWidth = gameCanvas.width / 3;
-const hitZoneY = 480;      
-const hitZoneHeight = 80;  
-let noteSpeed = 4;       
+const hitZoneY = 480;      // ตำแหน่งเส้นวัด (Hit Zone Line)
+const hitZoneHeight = 70;  
+const noteSpeed = 3.0;     // ปรับความเร็วบาร์ให้พอดีกับการยืดเส้น
 
 let activeNotes = [];
 
 // ===============================
 // 3. ฟังก์ชันเริ่มต้นและการทำงาน AI
 // ===============================
-async function init() {
-    const startBtn = document.getElementById("startBtn");
-    startBtn.disabled = true;
-    startBtn.innerText = "กำลังโหลดโมเดล...";
+function handleMenuAction() {
+    const btn = document.getElementById("mainActionBtn");
+    
+    if (!isModelLoaded) {
+        btn.classList.add("hidden");
+        document.getElementById("menuLoadingText").classList.remove("hidden");
+        init();
+    } else {
+        restartGame();
+    }
+}
 
+async function init() {
     try {
         const modelURL = MODEL_URL + "model.json";
         const metadataURL = MODEL_URL + "metadata.json";
@@ -58,22 +64,23 @@ async function init() {
         document.getElementById("loadingText").classList.add("hidden");
         
         isCameraReady = true;
+        isModelLoaded = true;
+        
         window.requestAnimationFrame(predictLoop);
         
-        startBtn.innerText = "กำลังเล่น...";
-        document.getElementById("restartBtn").disabled = false;
-        
+        document.getElementById("gameMenuScreen").classList.add("hidden");
         startGame();
+
     } catch (error) {
-        alert("ไม่สามารถโหลดโมเดลได้ กรุณาตรวจสอบ MODEL_URL");
+        alert("เกิดข้อผิดพลาดในการโหลดโมเดล กรุณาตรวจสอบ URL หรือการอนุญาตใช้กล้อง");
         console.error(error);
-        startBtn.disabled = false;
-        startBtn.innerText = "เริ่มเกม";
+        document.getElementById("mainActionBtn").classList.remove("hidden");
+        document.getElementById("menuLoadingText").classList.add("hidden");
     }
 }
 
 async function predictLoop() {
-    if (isCameraReady && gameRunning) {
+    if (isCameraReady) {
         webcam.update();
         const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
         const prediction = await model.predict(posenetOutput);
@@ -86,7 +93,7 @@ async function predictLoop() {
         }
 
         if (bestPred.probability > CONFIDENCE_LIMIT) {
-            currentPose = bestPred.className; // ใช้ชื่อคลาสโดยตรง
+            currentPose = bestPred.className.toLowerCase();
         } else {
             currentPose = "none";
         }
@@ -94,11 +101,7 @@ async function predictLoop() {
         document.getElementById("poseDisplay").innerText = currentPose;
         drawCamera(pose);
     }
-    
-    // วนลูปการอ่านค่ากล้องตลอดเวลา
-    if (isCameraReady) {
-        window.requestAnimationFrame(predictLoop);
-    }
+    window.requestAnimationFrame(predictLoop);
 }
 
 function drawCamera(pose) {
@@ -117,9 +120,12 @@ function startGame() {
     score = 0;
     activeNotes = [];
     frameCount = 0;
-    noteSpeed = 4; // ความเร็วเริ่มต้น
     startTime = Date.now();
-    document.getElementById("gameOverScreen").classList.add("hidden");
+    
+    document.getElementById("gameMenuScreen").classList.add("hidden");
+    
+    spawnNote(); 
+    
     gameLoop();
 }
 
@@ -128,40 +134,18 @@ function restartGame() {
 }
 
 function spawnNote() {
-    const laneIndex = Math.floor(Math.random() * 3); // 0=ซ้าย, 1=กลาง, 2=ขวา
-    let requiredPose, color;
-
-    // เงื่อนไขสีและท่าทางตามเลน
-    if (laneIndex === 0) { // เลนซ้าย
-        if (Math.random() > 0.5) {
-            requiredPose = poses.LEFT_ARM;
-            color = "#2ecc71"; // สีเขียว
-        } else {
-            requiredPose = poses.LEFT_NECK;
-            color = "#3498db"; // สีฟ้า
-        }
-    } else if (laneIndex === 1) { // เลนกลาง
-        requiredPose = poses.CENTER_ARM;
-        color = "#9b59b6"; // สีม่วง
-    } else { // เลนขวา
-        if (Math.random() > 0.5) {
-            requiredPose = poses.RIGHT_ARM;
-            color = "#2ecc71"; // สีเขียว
-        } else {
-            requiredPose = poses.RIGHT_NECK;
-            color = "#3498db"; // สีฟ้า
-        }
-    }
-
-    const isLongNote = Math.random() > 0.75; // โอกาส 25% เป็นโน้ตยาว
+    const selectedPose = POSE_MAP[Math.floor(Math.random() * POSE_MAP.length)];
+    const targetLane = Math.floor(Math.random() * 3);
+    
+    const noteLength = 300; // ความยาวบาร์ยืดเส้น
     
     activeNotes.push({
-        lane: laneIndex,
-        pose: requiredPose,
-        color: color,
-        type: isLongNote ? "long" : "short",
-        y: -150, 
-        length: isLongNote ? 250 : 100
+        lane: targetLane,
+        y: -noteLength,
+        length: noteLength,
+        color: selectedPose.color,
+        requiredPose: selectedPose.poseName.toLowerCase(),
+        isBeingHeld: false
     });
 }
 
@@ -173,44 +157,39 @@ function updateGame() {
     document.getElementById("timeDisplay").innerText = elapsedTime;
     document.getElementById("scoreDisplay").innerText = score;
 
-    // เพิ่มความยาก (ความเร็วตก) ตามเวลา
-    if (frameCount % 600 === 0) { noteSpeed += 0.3; }
-
-    // ปล่อยโน้ตใหม่ (เร็วขึ้นตามเวลา)
-    let spawnRate = Math.max(40, 90 - Math.floor(frameCount / 100));
-    if (frameCount % spawnRate === 0) {
+    // สร้างบาร์สีใหม่ทุกๆ ประมาณ 2 วินาที (120 เฟรม)
+    if (frameCount % 240 === 0) {
         spawnNote();
     }
 
     for (let i = activeNotes.length - 1; i >= 0; i--) {
         let note = activeNotes[i];
-        note.y += noteSpeed;
+        note.y += noteSpeed; // บาร์ค่อยๆ ตกลงมา
 
         let noteBottom = note.y;
         let noteTop = note.y - note.length;
 
-        // เช็กระยะ Hit Zone
-        if (noteBottom > hitZoneY && noteTop < hitZoneY + hitZoneHeight) {
-            // ถ้ายืนทำท่าตรงกับบล็อกที่กำลังผ่าน
-            if (currentPose === note.pose) {
-                if (note.type === "short") {
-                    score += 100;
-                    activeNotes.splice(i, 1);
-                    continue;
-                } else if (note.type === "long") {
-                    score += 2; // คะแนนไหลขึ้นต่อเนื่อง
-                    note.length -= noteSpeed; // หดตัวบล็อก
-                    if (note.length <= 0) {
-                        activeNotes.splice(i, 1);
-                        continue;
-                    }
+        // 🎯 ตรวจสอบช่วงเวลาที่บาร์กำลังข้ามเส้นวัด (hitZoneY)
+        if (noteBottom >= hitZoneY && noteTop <= hitZoneY) {
+            if (currentPose === note.requiredPose) {
+                // ยืดเส้นถูกต้อง -> บวกคะแนนสะสมรัวๆ
+                score += 2; 
+                note.isBeingHeld = true; // สถานะกำลังยืดสำเร็จ
+            } else {
+                note.isBeingHeld = false;
+                
+                // ระยะประนีประนอม 30px ให้ผู้เล่นมีเวลาขยับตัวเข้าท่าตอนขอบล่างเพิ่งถึงเส้น
+                if (noteBottom > hitZoneY + 30) {
+                    gameOver(); // ปล่อยท่าหลุดก่อนบาร์หมด -> Game Over ทันที!
+                    return;
                 }
             }
         }
 
-        // เช็ก Game Over: บล็อกหลุดขอบล่างไปแล้วโดยไม่ถูกทำลาย
-        if (noteTop > hitZoneY + hitZoneHeight) {
-            gameOver();
+        // 🎯 บาร์จะหายไปก็ต่อเมื่อ "ขอบบนสุด" (noteTop) ข้ามเส้นวัด hitZoneY ไปเรียบร้อยแล้วเท่านั้น
+        if (noteTop > hitZoneY) {
+            score += 10; // โบนัสยืดครบจนบาร์หมด
+            activeNotes.splice(i, 1); // บาร์หายไปจากจอ
         }
     }
 }
@@ -221,82 +200,61 @@ function updateGame() {
 function drawGame() {
     ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
-    // วาดพื้นหลังเลน
+    // วาดเลน 3 ช่อง
     for (let i = 0; i < 3; i++) {
         ctx.fillStyle = i % 2 === 0 ? "#1a1a2e" : "#16213e";
         ctx.fillRect(i * laneWidth, 0, laneWidth, gameCanvas.height);
-        
-        // เส้นแบ่งเลน
-        if (i > 0) {
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(i * laneWidth, 0);
-            ctx.lineTo(i * laneWidth, gameCanvas.height);
-            ctx.stroke();
-        }
     }
 
-    // วาด Hit Zone
-    ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+    // วาดเส้นวัด (Hit Zone Line)
+    ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
     ctx.fillRect(0, hitZoneY, gameCanvas.width, hitZoneHeight);
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(0, hitZoneY, gameCanvas.width, hitZoneHeight);
+    
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, hitZoneY);
+    ctx.lineTo(gameCanvas.width, hitZoneY);
+    ctx.stroke();
 
-    // วาดตัวโน้ต
+    // วาดแท่งบาร์สี
     for (let note of activeNotes) {
         let x = note.lane * laneWidth;
-        let padding = 15;
-        let drawWidth = laneWidth - (padding * 2);
-
-        ctx.fillStyle = note.color;
         
-        if (note.type === "short") {
-            // บล็อกสั้น
-            ctx.beginPath();
-            ctx.roundRect(x + padding, note.y - note.length, drawWidth, note.length, 10);
-            ctx.fill();
-            
-            // ขอบไฮไลต์สว่าง
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        } else {
-            // บล็อกยาว
-            ctx.globalAlpha = 0.8;
-            ctx.beginPath();
-            ctx.roundRect(x + padding, note.y - note.length, drawWidth, note.length, 10);
-            ctx.fill();
-            ctx.globalAlpha = 1.0;
+        ctx.fillStyle = note.color;
+        ctx.fillRect(x + 15, note.y - note.length, laneWidth - 30, note.length);
 
-            // หัวบล็อกยาวเพื่อสร้างมิติ
-            ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-            ctx.beginPath();
-            ctx.roundRect(x + padding, note.y - 15, drawWidth, 15, {bl: 10, br: 10});
-            ctx.fill();
-            
-            // ใส่ข้อความใบ้ท่า
-          /*  ctx.fillStyle = "#fff";
-            ctx.font = "12px Arial";
-            ctx.textAlign = "center";
-            let shortText = note.pose.includes("แขน") ? "แขน" : "คอ";
-            ctx.fillText(shortText, x + laneWidth/2, note.y - 25);
-        */
-            }
+        // 🌟 เอฟเฟกต์เรืองแสงสีขาวรอบบาร์เมื่อทำท่ายืดค้างไว้ถูกต้อง
+        if (note.isBeingHeld) {
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 4;
+            ctx.strokeRect(x + 15, note.y - note.length, laneWidth - 30, note.length);
+        }
     }
 }
 
 function gameLoop() {
     if (!gameRunning) return;
+    
     updateGame();
     drawGame();
+    
     window.requestAnimationFrame(gameLoop);
 }
 
 function gameOver() {
     gameRunning = false;
-    document.getElementById("gameOverScreen").classList.remove("hidden");
+    
+    const menuScreen = document.getElementById("gameMenuScreen");
+    menuScreen.classList.remove("hidden");
+    
+    document.getElementById("menuTitle").innerText = "GAME OVER!";
+    document.getElementById("gameOverStats").classList.remove("hidden");
     document.getElementById("finalTime").innerText = elapsedTime;
     document.getElementById("finalScore").innerText = score;
+    
+    const btn = document.getElementById("mainActionBtn");
+    btn.innerText = "เริ่มใหม่";
+    btn.classList.remove("hidden"); 
+    document.getElementById("menuLoadingText").classList.add("hidden"); 
 }
