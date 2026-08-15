@@ -1,5 +1,6 @@
 :root {
     --primary-color: #2b2d42;
+    --secondary-color: #8d99ae;
     --bg-color: #edf2f4;
     --accent-color: #ef233c;
 }
@@ -9,72 +10,61 @@ body {
     background-color: var(--bg-color);
     color: var(--primary-color);
     margin: 0;
-    padding: 20px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.header {
+.header h1 {
+    margin: 0 0 15px 0;
     text-align: center;
-    margin-bottom: 20px;
-}
-
-h1 { margin: 0 0 10px 0; }
-p { margin: 0; color: #555; }
-
-.controls {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-button {
-    padding: 10px 24px;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    background-color: var(--primary-color);
-    color: white;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-button:hover:not(:disabled) { background-color: var(--accent-color); }
-button:disabled { background-color: #8d99ae; cursor: not-allowed; }
-
-.status-board {
-    display: flex;
-    gap: 30px;
-    background: white;
-    padding: 15px 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-    font-size: 18px;
-    font-weight: bold;
 }
 
 .game-container {
     display: flex;
-    gap: 30px;
-    align-items: flex-start;
     justify-content: center;
-    flex-wrap: wrap;
 }
 
-.camera-section, .canvas-section {
+/* กรอบหลักของเกม (กำหนดขนาดเท่ากับความกว้าง Canvas 450px) */
+.canvas-section {
     position: relative;
-    background: #fff;
-    padding: 10px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    width: 100%;
+    max-width: 450px; 
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
 }
 
-canvas {
-    border-radius: 8px;
+/* 📌 ป้ายสี่เหลี่ยมผืนผ้ายาวรวมข้อมูลด้านบน */
+.top-bar-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    padding: 10px 12px;
+    border-bottom: 2px solid #edf2f4;
+    box-sizing: border-box;
+}
+
+/* กล้องเว็บแคมย่อขนาด */
+.camera-thumb {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    flex-shrink: 0;
     background: #111;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+}
+
+#cameraCanvas {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     display: block;
 }
 
@@ -83,22 +73,146 @@ canvas {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-weight: bold;
-    color: #999;
+    font-size: 10px;
+    color: #bbb;
+    text-align: center;
+    width: 100%;
     pointer-events: none;
 }
 
+/* ส่วนกล่องข้อมูลคำอธิบาย + สถานะ */
+.panel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-grow: 1;
+}
+
+/* บรรทัดบน: คำอธิบายสี */
+.legend-box {
+    display: flex;
+    justify-content: space-between;
+    background: #f8f9fa;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    border: 1px solid #e9ecef;
+}
+
+/* บรรทัดล่าง: สถานะเกม */
+.status-box {
+    display: flex;
+    justify-content: space-between;
+    background: var(--primary-color);
+    color: #ffffff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-box span {
+    color: #fee440; /* ไฮไลท์ตัวเลขสถานะเป็นสีเหลือง */
+}
+
+/* พื้นที่จอเกมหลัก */
+.game-view {
+    position: relative;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 4; 
+}
+
+canvas#gameCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #111;
+}
+
+/* หน้าต่าง Overlay เมนู/จบเกม */
 .overlay {
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.85);
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: rgba(0, 0, 0, 0.88);
     color: white;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border-radius: 12px;
     text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.overlay button {
+    margin-top: 20px;
+    font-size: 18px;
+    padding: 10px 30px;
+    border-radius: 50px;
+    border: none;
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(239, 35, 60, 0.4);
+    transition: 0.2s;
+}
+
+.overlay button:hover {
+    transform: scale(1.05);
 }
 
 .hidden { display: none !important; }
+
+/* ปรับแต่งขนาดตัวหนังสือและองค์ประกอบบนมือถือ */
+@media (max-width: 480px) {
+    body {
+        padding: 8px;
+    }
+
+    .header h1 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .top-bar-panel {
+        padding: 8px;
+        gap: 8px;
+    }
+
+    /* ย่อขนาดกล้องบนจอมือถือ */
+    .camera-thumb {
+        width: 70px;
+        height: 70px;
+    }
+
+    /* ย่อขนาดฟอนต์บนแถบป้าย */
+    .legend-box {
+        font-size: 10px;
+        padding: 4px 6px;
+    }
+
+    .status-box {
+        font-size: 11px;
+        padding: 5px 8px;
+    }
+
+    /* ปรับปุ่มเมนูให้พอดีกับจอมือถือ */
+    .overlay h2 {
+        font-size: 1.4rem;
+    }
+
+    .overlay p {
+        font-size: 0.9rem;
+    }
+
+    .overlay button {
+        font-size: 16px;
+        padding: 8px 24px;
+    }
+}
