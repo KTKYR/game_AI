@@ -192,8 +192,11 @@ function spawnNote() {
     const selectedConfig = availableConfigs[Math.floor(Math.random() * availableConfigs.length)];
     lastSpawnLane = selectedConfig.lane;
 
-    const noteLength = 100;
-
+    // 🎲 สุ่มความยาวของบาร์ (สั้นสุด 70px / ยาวสุด 220px)
+    const minLength = 70;  // ความยาวบาร์สั้นสุด
+    const maxLength = 220; // ความยาวบาร์ยาวสุด
+    const noteLength = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
+    
     activeNotes.push({
         lane: selectedConfig.lane,
         y: -noteLength,
