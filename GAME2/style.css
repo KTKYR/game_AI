@@ -11,6 +11,9 @@
     font-weight: normal;
     font-style: normal;
 }
+button, input, select, textarea {
+    font-family: inherit;
+}
 
 body {
     font-family: 'MyCustomFont';
@@ -28,7 +31,7 @@ body {
 
 /* 1. กำหนดให้ header มีขนาดพอดี และจัดโลโก้ให้อยู่ตรงกลาง */
 .header {
-    width: 30%;
+    width: 20%;
     text-align: center;
     margin-bottom: 15px;
 }
