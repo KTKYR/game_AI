@@ -14,6 +14,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .header h1 {
@@ -30,12 +32,20 @@ body {
 .canvas-section {
     position: relative;
     width: 100%;
-    max-width: 450px; 
+    max-width: 450px;
     margin: 0 auto;
     background: #ffffff;
     border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     overflow: hidden;
+    padding: 12px;
+
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+        "cam info"
+        "game game";
+    gap: 5px;
 }
 
 /* 📌 ป้ายสี่เหลี่ยมผืนผ้ายาวรวมข้อมูลด้านบน */
@@ -58,7 +68,8 @@ body {
     background: #111;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    grid-area: cam;
 }
 
 #cameraCanvas {
@@ -86,6 +97,8 @@ body {
     flex-direction: column;
     gap: 6px;
     flex-grow: 1;
+    grid-area: info;
+    justify-content: center;
 }
 
 /* บรรทัดบน: คำอธิบายสี */
@@ -113,7 +126,8 @@ body {
 }
 
 .status-box span {
-    color: #fee440; /* ไฮไลท์ตัวเลขสถานะเป็นสีเหลือง */
+    color: #fee440;
+    /* ไฮไลท์ตัวเลขสถานะเป็นสีเหลือง */
 }
 
 /* พื้นที่จอเกมหลัก */
@@ -121,7 +135,8 @@ body {
     position: relative;
     width: 100%;
     height: auto;
-    aspect-ratio: 3 / 4; 
+    aspect-ratio: 3 / 4;
+    grid-area: game;
 }
 
 canvas#gameCanvas {
@@ -134,9 +149,9 @@ canvas#gameCanvas {
 /* หน้าต่าง Overlay เมนู/จบเกม */
 .overlay {
     position: absolute;
-    top: 0; 
-    left: 0; 
-    width: 100%; 
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.88);
     color: white;
@@ -167,7 +182,9 @@ canvas#gameCanvas {
     transform: scale(1.05);
 }
 
-.hidden { display: none !important; }
+.hidden {
+    display: none !important;
+}
 
 /* ปรับแต่งขนาดตัวหนังสือและองค์ประกอบบนมือถือ */
 @media (max-width: 480px) {
@@ -179,7 +196,7 @@ canvas#gameCanvas {
         font-size: 1.5rem;
         margin-bottom: 10px;
     }
-    
+
     .top-bar-panel {
         padding: 8px;
         gap: 8px;
@@ -214,5 +231,70 @@ canvas#gameCanvas {
     .overlay button {
         font-size: 16px;
         padding: 8px 24px;
+    }
+}
+
+@media (min-width: 1280px) {
+    body {
+        max-width: 1920px;
+        max-height: 1080px;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .game-container {
+        /* width: 100%; */
+        /* max-width: 1500px; */
+        /* max-height: 960px; */
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+    }
+
+    .canvas-section {
+        max-width: 1400px;
+        /* max-height: 960px; */
+        display: grid;
+        padding: 15px;
+
+        grid-template-columns: 450px 800px;
+        grid-row: auto 550px;
+        grid-template-areas:
+            "cam info"
+            /* แถวที่ 1: ซ้ายกล้อง ขวาข้อมูล */
+            "cam game";
+        /* แถวที่ 2: ซ้ายยังเป็นกล้องอยู่ ขวาเป็นเกม */
+        gap: 10px;
+    }
+
+    .camera-thumb {
+        width: 100%;
+        height: 630px;
+        grid-area: cam;
+    }
+
+    .game-view {
+        width: 100%;
+        height: 550px;
+        grid-area: game;
+    }
+
+    .panel-info {
+        grid-area: info;
+        justify-content: flex-end;
+    }
+
+    .top-bar-panel {
+        display: none;
+        gap: 20px;
+    }
+
+    .legend-box {
+        font-size: 24px;
+        height: 20px;
+    }
+
+    .status-box {
+        font-size: 18px;
     }
 }
