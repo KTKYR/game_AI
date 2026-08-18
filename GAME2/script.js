@@ -1,7 +1,7 @@
 // ===============================
 // 1. การตั้งค่า Teachable Machine & ท่าทาง
 // ===============================
-const MODEL_URL = "./train/"; // 🛠️ URL โมเดล
+const MODEL_URL = "https://teachablemachine.withgoogle.com/models/fS1o6k0GB/"; // 🛠️ URL โมเดล
 const CONFIDENCE_LIMIT = 0.80; 
 
 let model, webcam, cameraCtx;
