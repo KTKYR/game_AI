@@ -1,22 +1,31 @@
 // ===============================
 // 1. การตั้งค่า Teachable Machine & ท่าทาง
 // ===============================
-const MODEL_URL = "https://teachablemachine.withgoogle.com/models/qhYQpY7zf/"; // **นำ URL โมเดลของคุณมาใส่ที่นี่**
+const MODEL_URL = "./train/"; // 🛠️ URL โมเดล
 const CONFIDENCE_LIMIT = 0.80; 
 
 let model, webcam, cameraCtx;
-let currentPose = "none";
+let currentPose = "none"; // ต้องมีคลาส "none" (ท่ายืนเฉยๆ) ในโมเดลด้วย
 let isCameraReady = false;
 let isModelLoaded = false;
+let predictAnimationFrameId = null;
+let gameAnimationFrameId = null;
 
+// ปรับปรุง POSE_MAP ใหม่ให้ตรงกับ labels ใน metadata.json
 const POSE_MAP = [
-    { id: "red", color: "#ef233c", poseName: "left" },
-    { id: "yellow", color: "#fee440", poseName: "up" },
-    { id: "blue", color: "#00f5d4", poseName: "right" }
+    // หลักที่ 1 (ซ้าย: lane 0)
+    { lane: 0, id: "blue_left", color: "#0072f5", poseName: "เอียงคอซ้าย", label: "เอียงคอซ้าย" },
+    { lane: 0, id: "red_left", color: "#ef233c", poseName: "ยืดแขนซ้าย", label: "ยืดแขนซ้าย" },
+    
+    // หลักที่ 2 (กลาง: lane 1)
+    { lane: 1, id: "yellow", color: "#fee440", poseName: "ยืดขึ้น", label: "ยืดขึ้น" },
+    
+    // หลักที่ 3 (ขวา: lane 2)
+    { lane: 2, id: "blue_right", color: "#0072f5", poseName: "เอียงคอขวา", label: "เอียงคอขวา" },
+    { lane: 2, id: "red_right", color: "#ef233c", poseName: "ยืดแขนขวา", label: "ยืดแขนขวา" }
 ];
-
 // ===============================
-// 2. ตัวแปรระบบเกม
+// 2. ตัวแปรระบบเกม & Canvas
 // ===============================
 const gameCanvas = document.getElementById("gameCanvas");
 const ctx = gameCanvas.getContext("2d");
@@ -27,10 +36,11 @@ let startTime = 0;
 let elapsedTime = 0;
 let frameCount = 0;
 
-const laneWidth = gameCanvas.width / 3;
-const hitZoneY = 480;      // ตำแหน่งเส้นวัด (Hit Zone Line)
-const hitZoneHeight = 70;  
-const noteSpeed = 3.0;     // ปรับความเร็วบาร์ให้พอดีกับการยืดเส้น
+const laneWidth = gameCanvas.width / 3; // 450 / 3 = 150px
+const noteWidth = laneWidth - 30;       // ความกว้างโน้ต 120px
+const hitZoneY = 480;                   // ตำแหน่งเส้นวัด
+const hitZoneHeight = 70;   
+const noteSpeed = 3.0;     
 
 let activeNotes = [];
 
@@ -61,12 +71,16 @@ async function init() {
 
         const cameraCanvas = document.getElementById("cameraCanvas");
         cameraCtx = cameraCanvas.getContext("2d");
-        document.getElementById("loadingText").classList.add("hidden");
+        
+        const loadingText = document.getElementById("loadingText");
+        if (loadingText) loadingText.classList.add("hidden");
         
         isCameraReady = true;
         isModelLoaded = true;
         
-        window.requestAnimationFrame(predictLoop);
+        if (!predictAnimationFrameId) {
+            predictLoop();
+        }
         
         document.getElementById("gameMenuScreen").classList.add("hidden");
         startGame();
@@ -98,10 +112,12 @@ async function predictLoop() {
             currentPose = "none";
         }
 
-        document.getElementById("poseDisplay").innerText = currentPose;
+        const poseDisplay = document.getElementById("poseDisplay");
+        if (poseDisplay) poseDisplay.innerText = currentPose;
+        
         drawCamera(pose);
     }
-    window.requestAnimationFrame(predictLoop);
+    predictAnimationFrameId = window.requestAnimationFrame(predictLoop);
 }
 
 function drawCamera(pose) {
@@ -116,6 +132,10 @@ function drawCamera(pose) {
 // 4. ระบบการเล่น (Game Logic)
 // ===============================
 function startGame() {
+    if (gameAnimationFrameId) {
+        cancelAnimationFrame(gameAnimationFrameId);
+    }
+
     gameRunning = true;
     score = 0;
     activeNotes = [];
@@ -123,9 +143,6 @@ function startGame() {
     startTime = Date.now();
     
     document.getElementById("gameMenuScreen").classList.add("hidden");
-    
-    spawnNote(); 
-    
     gameLoop();
 }
 
@@ -134,17 +151,17 @@ function restartGame() {
 }
 
 function spawnNote() {
-    const selectedPose = POSE_MAP[Math.floor(Math.random() * POSE_MAP.length)];
-    const targetLane = Math.floor(Math.random() * 3);
-    
-    const noteLength = 300; // ความยาวบาร์ยืดเส้น
+    // สุ่มจาก 3 ท่าทาง (ซึ่งแต่ละท่าผูกกับเลน 0, 1, 2 เรียบร้อยแล้ว)
+    const selectedConfig = POSE_MAP[Math.floor(Math.random() * POSE_MAP.length)];
+    const noteLength = 300; 
     
     activeNotes.push({
-        lane: targetLane,
+        lane: selectedConfig.lane,
         y: -noteLength,
         length: noteLength,
-        color: selectedPose.color,
-        requiredPose: selectedPose.poseName.toLowerCase(),
+        color: selectedConfig.color,
+        requiredPose: selectedConfig.poseName.toLowerCase(),
+        label: selectedConfig.label,
         isBeingHeld: false
     });
 }
@@ -154,59 +171,76 @@ function updateGame() {
 
     frameCount++;
     elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
-    document.getElementById("timeDisplay").innerText = elapsedTime;
-    document.getElementById("scoreDisplay").innerText = score;
+    
+    const timeDisplay = document.getElementById("timeDisplay");
+    const scoreDisplay = document.getElementById("scoreDisplay");
+    if (timeDisplay) timeDisplay.innerText = elapsedTime;
+    if (scoreDisplay) scoreDisplay.innerText = score;
 
-    // สร้างบาร์สีใหม่ทุกๆ ประมาณ 2 วินาที (120 เฟรม)
-    if (frameCount % 240 === 0) {
+    // สปอว์นบาร์ใหม่ทุกๆ 240 เฟรม (~4 วินาที)
+    if (frameCount === 1 || frameCount % 240 === 0) {
         spawnNote();
     }
 
     for (let i = activeNotes.length - 1; i >= 0; i--) {
         let note = activeNotes[i];
-        note.y += noteSpeed; // บาร์ค่อยๆ ตกลงมา
+        note.y += noteSpeed;
 
         let noteBottom = note.y;
         let noteTop = note.y - note.length;
 
-        // 🎯 ตรวจสอบช่วงเวลาที่บาร์กำลังข้ามเส้นวัด (hitZoneY)
+        // 🎯 ตรวจสอบช่วงเวลาที่บาร์กำลังข้ามเส้นวัด
         if (noteBottom >= hitZoneY && noteTop <= hitZoneY) {
             if (currentPose === note.requiredPose) {
-                // ยืดเส้นถูกต้อง -> บวกคะแนนสะสมรัวๆ
                 score += 2; 
-                note.isBeingHeld = true; // สถานะกำลังยืดสำเร็จ
+                note.isBeingHeld = true;
             } else {
                 note.isBeingHeld = false;
                 
-                // ระยะประนีประนอม 30px ให้ผู้เล่นมีเวลาขยับตัวเข้าท่าตอนขอบล่างเพิ่งถึงเส้น
+                // กฎใหม่: ถ้าทำท่าผิด (ไม่ใช่ none และไม่ใช่ท่าที่ถูกต้อง) ให้แพ้ทันที
+                if (currentPose !== "none" && currentPose !== note.requiredPose) {
+                    gameOver("ทำท่าผิด! เกมโอเวอร์ 😭");
+                    return;
+                }
+                
+                // กฎเดิม: ถ้าบาร์หลุดเส้นวัด (ทำไม่ทัน) ให้แพ้
                 if (noteBottom > hitZoneY + 30) {
-                    gameOver(); // ปล่อยท่าหลุดก่อนบาร์หมด -> Game Over ทันที!
+                    gameOver("ทำท่าไม่ทัน! เกมโอเวอร์ 😭");
                     return;
                 }
             }
         }
 
-        // 🎯 บาร์จะหายไปก็ต่อเมื่อ "ขอบบนสุด" (noteTop) ข้ามเส้นวัด hitZoneY ไปเรียบร้อยแล้วเท่านั้น
+        // 🎯 บาร์หายไปเมื่อขอบบนข้ามเส้นวัด
         if (noteTop > hitZoneY) {
-            score += 10; // โบนัสยืดครบจนบาร์หมด
-            activeNotes.splice(i, 1); // บาร์หายไปจากจอ
+            score += 10; 
+            activeNotes.splice(i, 1);
         }
     }
 }
-
 // ===============================
 // 5. การแสดงผลกราฟิก (Rendering)
 // ===============================
 function drawGame() {
     ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
-    // วาดเลน 3 ช่อง
+    // 1. วาดพื้นหลังเลน 3 ช่อง
     for (let i = 0; i < 3; i++) {
         ctx.fillStyle = i % 2 === 0 ? "#1a1a2e" : "#16213e";
         ctx.fillRect(i * laneWidth, 0, laneWidth, gameCanvas.height);
     }
 
-    // วาดเส้นวัด (Hit Zone Line)
+    // 2. วาดเส้นแบ่งเลนแนวตั้ง 2 เส้น (กั้นช่อง ซ้าย-กลาง-ขวา)
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+    ctx.lineWidth = 2;
+    for (let i = 1; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * laneWidth, 0);
+        ctx.lineTo(i * laneWidth, gameCanvas.height);
+        ctx.stroke();
+    }
+
+    // 3. วาดเส้นวัด (Hit Zone Line)
     ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
     ctx.fillRect(0, hitZoneY, gameCanvas.width, hitZoneHeight);
     
@@ -217,19 +251,27 @@ function drawGame() {
     ctx.lineTo(gameCanvas.width, hitZoneY);
     ctx.stroke();
 
-    // วาดแท่งบาร์สี
+    // 4. วาดแท่งบาร์สีและตัวอักษรบอกท่า
     for (let note of activeNotes) {
-        let x = note.lane * laneWidth;
+        let x = (note.lane * laneWidth) + 15;
+        let noteTop = note.y - note.length;
         
         ctx.fillStyle = note.color;
-        ctx.fillRect(x + 15, note.y - note.length, laneWidth - 30, note.length);
+        ctx.fillRect(x, noteTop, noteWidth, note.length);
 
-        // 🌟 เอฟเฟกต์เรืองแสงสีขาวรอบบาร์เมื่อทำท่ายืดค้างไว้ถูกต้อง
+        // แสดงกรอบเรืองแสงเมื่อผู้เล่นทำท่าถูกต้อง
         if (note.isBeingHeld) {
             ctx.strokeStyle = "#ffffff";
             ctx.lineWidth = 4;
-            ctx.strokeRect(x + 15, note.y - note.length, laneWidth - 30, note.length);
+            ctx.strokeRect(x, noteTop, noteWidth, note.length);
         }
+
+        // เขียนข้อความบอกชื่อท่ากำกับไว้ตรงกลางบาร์
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 16px Kanit, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(note.label, x + (noteWidth / 2), noteTop + (note.length / 2));
     }
 }
 
@@ -239,16 +281,22 @@ function gameLoop() {
     updateGame();
     drawGame();
     
-    window.requestAnimationFrame(gameLoop);
+    gameAnimationFrameId = window.requestAnimationFrame(gameLoop);
 }
 
-function gameOver() {
+function gameOver(reasonText = "คุณทำท่ายืดเส้นไม่ทัน บาร์หมดไปแล้ว! 😭") {
     gameRunning = false;
+    if (gameAnimationFrameId) {
+        cancelAnimationFrame(gameAnimationFrameId);
+    }
     
     const menuScreen = document.getElementById("gameMenuScreen");
     menuScreen.classList.remove("hidden");
     
     document.getElementById("menuTitle").innerText = "GAME OVER!";
+    // อัปเดตข้อความสาเหตุการแพ้
+    document.querySelector("#gameOverStats p:first-child").innerText = reasonText;
+    
     document.getElementById("gameOverStats").classList.remove("hidden");
     document.getElementById("finalTime").innerText = elapsedTime;
     document.getElementById("finalScore").innerText = score;
