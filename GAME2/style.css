@@ -236,65 +236,92 @@ canvas#gameCanvas {
 
 @media (min-width: 1280px) {
     body {
-        max-width: 1920px;
-        max-height: 1080px;
+        padding: 10px 20px;
         height: 100vh;
-        overflow: hidden;
+        box-sizing: border-box;
+    }
+
+    .header h1 {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
     }
 
     .game-container {
-        /* width: 100%; */
-        /* max-width: 1500px; */
-        /* max-height: 960px; */
-        display: flex;
-        flex-direction: row;
-        gap: 20px;
+        width: 100%;
+        height: calc(100vh - 80px);
     }
 
     .canvas-section {
-        max-width: 1400px;
-        /* max-height: 960px; */
-        display: grid;
-        padding: 15px;
+        width: 100%;
+        max-width: 1800px;
+        height: 100%;
+        box-sizing: border-box;
+        padding: 20px;
 
-        grid-template-columns: 450px 800px;
-        grid-row: auto 550px;
+        /* 1. ขยายความกว้างกล้องเป็น 550px / ความสูงแถวบนเป็น 550px */
+        grid-template-columns: 550px 1fr; 
+        grid-template-rows: 550px 1fr; 
         grid-template-areas:
-            "cam info"
-            /* แถวที่ 1: ซ้ายกล้อง ขวาข้อมูล */
-            "cam game";
-        /* แถวที่ 2: ซ้ายยังเป็นกล้องอยู่ ขวาเป็นเกม */
-        gap: 10px;
-    }
-
-    .camera-thumb {
-        width: 100%;
-        height: 630px;
-        grid-area: cam;
-    }
-
-    .game-view {
-        width: 100%;
-        height: 550px;
-        grid-area: game;
-    }
-
-    .panel-info {
-        grid-area: info;
-        justify-content: flex-end;
-    }
-
-    .top-bar-panel {
-        display: none;
+            "cam game"
+            "info game";
         gap: 20px;
     }
 
+    /* 2. กล้องขยายตามขนาด Grid 550px */
+    .camera-thumb {
+        width: 100%;
+        height: 100%;
+        grid-area: cam;
+        border-radius: 12px;
+    }
+
+    /* 3. ขยายกล่องข้อความ และฟอนต์แสดงสถานะฝั่งซ้าย */
+    .panel-info {
+        grid-area: info;
+        justify-content: flex-start;
+        gap: 15px;
+    }
+
     .legend-box {
-        font-size: 24px;
-        height: 20px;
+        font-size: 22px;       /* ปรับตัวหนังสือบอกสีท่าให้ใหญ่ขึ้น */
+        padding: 16px 20px;    /* ปรับขอบกล่องให้ใหญ่ขึ้น */
+        border-radius: 10px;
     }
 
     .status-box {
-        font-size: 18px;
+        font-size: 22px;       /* ปรับตัวหนังสือเวลา/คะแนน/ท่า ให้ใหญ่ขึ้น */
+        padding: 16px 20px;
+        border-radius: 10px;
+    }
+
+    /* 4. ปรับหน้าจอเกมฝั่งขวาให้ยืดเต็มพื้นที่ */
+    .game-view {
+        width: 100%;
+        height: 100%;
+        grid-area: game;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    canvas#gameCanvas {
+        width: 100%;
+        height: 100%;
+        /* สั่งให้ Canvas ขยายตัวเติมเต็มพื้นที่ฝั่งขวาทั้งหมด */
+        object-fit: fill; 
+    }
+
+    /* 5. ปรับหน้าจอ Game Over และปุ่มกดให้ใหญ่รับกับหน้าจอ */
+    .overlay h2 {
+        font-size: 2.8rem;
+    }
+
+    .overlay p {
+        font-size: 1.5rem;
+        margin: 8px 0;
+    }
+
+    .overlay button {
+        font-size: 22px;
+        padding: 14px 40px;
     }
 }
