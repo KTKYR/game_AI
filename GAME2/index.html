@@ -1,20 +1,17 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Symphony Pose - Stretch Rhythm Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
     <div class="header">
-        <h1>Symphony Pose 🎵</h1>
+        <img src="Logo Template.svg" alt="logo">
     </div>
 
     <div class="game-container">
-        <!-- หน้าจอเกม + แถบป้ายสี่เหลี่ยมผืนผ้าด้านบน -->
         <div class="canvas-section">
 
             <!-- 1. กล้องเว็บแคม -->
@@ -26,9 +23,9 @@
             <!-- 2. ข้อมูลคำอธิบายท่า และ สถานะเกม -->
             <div class="panel-info">
                 <div class="legend-box">
-                    <span>🔴 ยืดด้านซ้าย</span>
-                    <span>🟡 ยืดชูขึ้น</span>
-                    <span>🔵 ยืดด้านขวา</span>
+                    <span>🔴 ยืดแขน(ซ้าย/ขวา)</span>
+                    <span>🟡 ชูแขนตรง </span>
+                    <span>🔵 เอียงคอ(ซ้าย/ขวา)</span>
                 </div>
 
                 <div class="status-box">
@@ -36,9 +33,9 @@
                     <div>คะแนน: <span id="scoreDisplay">0</span></div>
                     <div>ท่า: <span id="poseDisplay">-</span></div>
                 </div>
-            </div> <!-- 🚨 ✅ จุดสำคัญ: ต้องมีแท็กปิด </div> ของ panel-info ตรงนี้! -->
+            </div>
 
-            <!-- 3. พื้นที่จอเกมหลัก (ต้องแยกตัวออกมาเป็นอิสระ) -->
+            <!-- 3. พื้นที่จอเกมหลัก -->
             <div class="game-view">
                 <canvas id="gameCanvas" width="550" height="600"></canvas>
 
@@ -46,27 +43,28 @@
                 <div id="gameMenuScreen" class="overlay">
                     <h2 id="menuTitle">พร้อมยืดเส้นหรือยัง?</h2>
 
-                    <!-- ข้อความตอนกำลังโหลดโมเดล -->
-                    <div id="menuLoadingText" class="hidden">กำลังเชื่อมต่อ AI และกล้อง... ⏳</div>
-
-                    <!-- สถิติตอนจบเกม (ซ่อนไว้ก่อน) -->
                     <div id="gameOverStats" class="hidden">
-                        <p>สาเหตุที่แพ้</p>
-                        <p>เวลาที่รอด: <span id="finalTime">0</span> วินาที</p>
+                        <p>คุณทำท่ายืดเส้นไม่ทัน บาร์หมดไปแล้ว! 😭</p>
+                        <p>เวลาที่เล่นได้: <span id="finalTime">0</span> วินาที</p>
                         <p>คะแนนรวม: <span id="finalScore">0</span></p>
                     </div>
-                    <!-- เนื้อหาอื่นๆ... -->
+
+                    <!-- ส่วนเลือกเพลงจากชุดที่ 1 -->
+                    <div class="music-setup">
+                        <h3>เลือกเพลง 🎵</h3>
+                        <div id="songListContainer" class="song-list-grid"></div>
+                    </div>
+
                     <button id="mainActionBtn" onclick="handleMenuAction()">เริ่มเกม</button>
+                    <p id="menuLoadingText" class="hidden" style="color: #fee440; margin-top: 15px;">กำลังเชื่อมต่อ AI และกล้อง... ⏳</p>
                 </div>
             </div>
 
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8.3/dist/teachablemachine-pose.min.js"></script>
     <script src="script.js"></script>
 </body>
-
 </html>
