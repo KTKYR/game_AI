@@ -204,7 +204,7 @@ function updateGame() {
                 }
                 
                 // กฎเดิม: ถ้าบาร์หลุดเส้นวัด (ทำไม่ทัน) ให้แพ้
-                if (noteBottom > hitZoneY + 30) {
+                if (noteBottom > hitZoneY + 150) {
                     gameOver("ทำท่าไม่ทัน! เกมโอเวอร์ 😭");
                     return;
                 }

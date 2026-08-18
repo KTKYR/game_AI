@@ -45,6 +45,16 @@
                 <!-- หน้าต่างเมนู/จบเกม -->
                 <div id="gameMenuScreen" class="overlay">
                     <h2 id="menuTitle">พร้อมยืดเส้นหรือยัง?</h2>
+
+                    <!-- ข้อความตอนกำลังโหลดโมเดล -->
+                    <div id="menuLoadingText" class="hidden">กำลังเชื่อมต่อ AI และกล้อง... ⏳</div>
+
+                    <!-- สถิติตอนจบเกม (ซ่อนไว้ก่อน) -->
+                    <div id="gameOverStats" class="hidden">
+                        <p>สาเหตุที่แพ้</p>
+                        <p>เวลาที่รอด: <span id="finalTime">0</span> วินาที</p>
+                        <p>คะแนนรวม: <span id="finalScore">0</span></p>
+                    </div>
                     <!-- เนื้อหาอื่นๆ... -->
                     <button id="mainActionBtn" onclick="handleMenuAction()">เริ่มเกม</button>
                 </div>
