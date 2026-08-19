@@ -37,8 +37,8 @@ let audioPlayer = new Audio();
 audioPlayer.crossOrigin = "anonymous";
 
 let songList = [
-    { name: "🎵 ถิ่นชงโค", url: "./mp3/________________________.mp3", bpm: 120 },
-    { name: "🎵 Boy Don't Cry", url: "./mp3/SAUCE BKK - _______________ (Boys Dont Cry) COVER VERSION [Original Song by PROXIE].mp3", bpm: 120 }
+    { name: "🎵 ถิ่นชงโค", url: "./mp3/thinchongkho.mp3", bpm: 120 },
+    { name: "🎵 Boy Don't Cry", url: "./mp3/Boys Dont Cry.mp3", bpm: 120 }
 ];
 let currentSongIndex = 0;
 let nextSpawnTime = 0;
@@ -46,7 +46,7 @@ let secondsPerBeat = 0;
 
 audioPlayer.onerror = function () {
     console.warn("⚠️ ไม่สามารถเล่นเสียงจากลิงก์นี้ได้ ระบบสลับไปใช้เสียงสำรองชั่วคราว");
-    audioPlayer.src = "./mp3/________________________.mp3";
+    audioPlayer.src = "./mp3/thinchongkho.mp3";
     audioPlayer.play().catch(e => console.error("Audio fallback play failed:", e));
 };
 
