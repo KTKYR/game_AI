@@ -12,11 +12,11 @@ let predictAnimationFrameId = null;
 let gameAnimationFrameId = null;
 
 const POSE_MAP = [
-    { lane: 0, id: "blue_left", color: "#0072f5", poseName: "เอียงคอซ้าย", label: "เอียงคอซ้าย" },
-    { lane: 0, id: "red_left", color: "#ef233c", poseName: "ยืดแขนด้านซ้าย", label: "ยืดแขนซ้าย" },
-    { lane: 1, id: "yellow", color: "#fee440", poseName: "ยืดขึ้น", label: "ยืดขึ้น" },
-    { lane: 2, id: "blue_right", color: "#0072f5", poseName: "เอียงคอขวา", label: "เอียงคอขวา" },
-    { lane: 2, id: "red_right", color: "#ef233c", poseName: "ยืดแขนด้านขวา", label: "ยืดแขนขวา" }
+    { lane: 0, id: "blue_left", color: "#29c5ff", poseName: "เอียงคอซ้าย", label: "เอียงคอซ้าย" },
+    { lane: 0, id: "red_left", color: "#ff2d55", poseName: "ยืดแขนด้านซ้าย", label: "ยืดแขนซ้าย" },
+    { lane: 1, id: "yellow", color: "#ffd23f", poseName: "ยืดขึ้น", label: "ยืดขึ้น" },
+    { lane: 2, id: "blue_right", color: "#29c5ff", poseName: "เอียงคอขวา", label: "เอียงคอขวา" },
+    { lane: 2, id: "red_right", color: "#ff2d55", poseName: "ยืดแขนด้านขวา", label: "ยืดแขนขวา" }
 ];
 
 // ===============================
@@ -272,6 +272,23 @@ function updateGame() {
 // ===============================
 // 5. การแสดงผลกราฟิก
 // ===============================
+// วาดกล่องมุมโค้งแบบรองรับเบราว์เซอร์ที่ไม่มี ctx.roundRect
+function drawRoundedRect(context, x, y, w, h, r) {
+    if (typeof context.roundRect === "function") {
+        context.beginPath();
+        context.roundRect(x, y, w, h, r);
+        return;
+    }
+    const rad = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+    context.beginPath();
+    context.moveTo(x + rad, y);
+    context.arcTo(x + w, y, x + w, y + h, rad);
+    context.arcTo(x + w, y + h, x, y + h, rad);
+    context.arcTo(x, y + h, x, y, rad);
+    context.arcTo(x, y, x + w, y, rad);
+    context.closePath();
+}
+
 function drawGame() {
     ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
@@ -279,14 +296,22 @@ function drawGame() {
     const noteWidth = laneWidth - 30;
     const hitZoneY = 480;
     const hitZoneHeight = 70;
+    const laneTintColors = ["rgba(255, 45, 85, 0.05)", "rgba(255, 210, 63, 0.05)", "rgba(41, 197, 255, 0.05)"];
 
+    // พื้นเลนไล่เฉดสี + เส้นแบ่งเรืองแสงบาง ๆ
     for (let i = 0; i < 3; i++) {
-        ctx.fillStyle = i % 2 === 0 ? "#1a1a2e" : "#16213e";
+        const laneGrad = ctx.createLinearGradient(0, 0, 0, gameCanvas.height);
+        laneGrad.addColorStop(0, "#0d0a1c");
+        laneGrad.addColorStop(1, "#150c2b");
+        ctx.fillStyle = laneGrad;
+        ctx.fillRect(i * laneWidth, 0, laneWidth, gameCanvas.height);
+
+        ctx.fillStyle = laneTintColors[i];
         ctx.fillRect(i * laneWidth, 0, laneWidth, gameCanvas.height);
     }
 
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+    ctx.lineWidth = 1.5;
     for (let i = 1; i < 3; i++) {
         ctx.beginPath();
         ctx.moveTo(i * laneWidth, 0);
@@ -294,35 +319,70 @@ function drawGame() {
         ctx.stroke();
     }
 
-    ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+    // Hit zone เรืองแสงแบบชีพจร (pulse) ให้ความรู้สึกมีชีวิตชีวา
+    const pulse = 0.55 + Math.sin(Date.now() / 260) * 0.2;
+    ctx.fillStyle = `rgba(185, 103, 255, ${0.10 * pulse + 0.05})`;
     ctx.fillRect(0, hitZoneY, gameCanvas.width, hitZoneHeight);
 
-    ctx.strokeStyle = "#ffffff";
+    ctx.save();
+    ctx.shadowColor = `rgba(185, 103, 255, ${pulse})`;
+    ctx.shadowBlur = 18;
+    ctx.strokeStyle = "#e8dcff";
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(0, hitZoneY);
     ctx.lineTo(gameCanvas.width, hitZoneY);
     ctx.stroke();
+    ctx.restore();
 
     for (let note of activeNotes) {
         let x = (note.lane * laneWidth) + 15;
         let noteTop = note.y - note.length;
+        const radius = Math.min(14, noteWidth / 2, note.length / 2);
 
-        ctx.fillStyle = note.color;
-        ctx.fillRect(x, noteTop, noteWidth, note.length);
+        // แท่งโน้ตไล่เฉดสีจากตัวเองไปทึบ พร้อมแสงเรือง
+        const noteGrad = ctx.createLinearGradient(x, noteTop, x, note.y);
+        noteGrad.addColorStop(0, note.color);
+        noteGrad.addColorStop(1, shadeColor(note.color, -25));
+
+        ctx.save();
+        ctx.shadowColor = note.color;
+        ctx.shadowBlur = note.isBeingHeld ? 26 : 12;
+        ctx.fillStyle = noteGrad;
+        drawRoundedRect(ctx, x, noteTop, noteWidth, note.length, radius);
+        ctx.fill();
+        ctx.restore();
 
         if (note.isBeingHeld) {
+            ctx.save();
             ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 4;
-            ctx.strokeRect(x, noteTop, noteWidth, note.length);
+            ctx.lineWidth = 3;
+            drawRoundedRect(ctx, x, noteTop, noteWidth, note.length, radius);
+            ctx.stroke();
+            ctx.restore();
         }
 
-        ctx.font = "bold 18px 'MyCustomFont'";
+        ctx.font = "700 18px 'Kanit', sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = "rgba(0,0,0,0.6)";
+        ctx.shadowBlur = 4;
         ctx.fillText(note.label, x + (noteWidth / 2), noteTop + (note.length / 2));
+        ctx.shadowBlur = 0;
     }
+}
+
+// ปรับความสว่าง/มืดของสี hex เพื่อทำไล่เฉด (percent ติดลบ = เข้มขึ้น)
+function shadeColor(hex, percent) {
+    const num = parseInt(hex.replace("#", ""), 16);
+    let r = (num >> 16) + Math.round(255 * (percent / 100));
+    let g = ((num >> 8) & 0x00ff) + Math.round(255 * (percent / 100));
+    let b = (num & 0x0000ff) + Math.round(255 * (percent / 100));
+    r = Math.max(0, Math.min(255, r));
+    g = Math.max(0, Math.min(255, g));
+    b = Math.max(0, Math.min(255, b));
+    return `rgb(${r}, ${g}, ${b})`;
 }
 
 function gameLoop() {
