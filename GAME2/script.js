@@ -34,7 +34,7 @@ let activeNotes = [];
 let lastSpawnLane = -1;
 
 let audioPlayer = new Audio();
-audioPlayer.crossOrigin = "anonymous";
+// audioPlayer.crossOrigin = "anonymous";
 
 let songList = [
     { name: "🎵 ถิ่นชงโค", url: "./mp3/thinchongkho.mp3", bpm: 120 },
