@@ -834,10 +834,10 @@ canvas#gameCanvas {
    ----------------------------------------------------- */
 @media (min-width: 1280px) {
     .game-section {
-        height: 100vh; /* บังคับความสูงเท่าหน้าจอเป๊ะ */
-        padding: 4vh 20px; /* ขอบบนล่างยืดหยุ่นตาม % ของจอ */
+        height: 100vh;
+        padding: 4vh 20px;
         box-sizing: border-box;
-        overflow: hidden; /* ล็อกไม่ให้มีแถบ Scroll เลื่อนขึ้นลง */
+        overflow: hidden;
     }
 
     .game-container {
@@ -845,32 +845,29 @@ canvas#gameCanvas {
         height: 100%;
         display: flex;
         justify-content: center;
-        align-items: center; /* จัดให้อยู่กึ่งกลางจอเป๊ะ */
+        align-items: center;
     }
 
 .canvas-section {
         width: 100%;
-        /* 🌟 1. ขยายความกว้างสูงสุดจาก 1100px เป็น 1350px เพื่อให้กางออกด้านข้างได้อีก */
         max-width: 1200px; 
         height: 100%;
         max-height: 88vh; 
         box-sizing: border-box;
         padding: 24px;
         
-        /* 🌟 2. ขยายขนาดฝั่งกล้อง (จาก 460px เป็น 540px) 
-           ส่วนเกม (1fr) จะขยายกว้างขึ้นอัตโนมัติตามพื้นที่ที่เหลือ */
+
         grid-template-columns: 480px 1fr; 
         grid-template-rows: 1fr auto; 
         grid-template-areas:
             "cam game"
             "info game";
-        gap: 26px; /* ขยับระยะห่างตรงกลางให้กว้างขึ้นอีกนิดเพื่อให้ดูไม่อึดอัด */
+        gap: 26px;
     }
 
     .camera-thumb {
         width: 100%;
-        height: 100%; /* 🌟 สั่งให้กล้องยืดเต็มความสูงที่เหลืออยู่ */
-        /* ลบ aspect-ratio ออก เพื่อปลดล็อกความสูง */
+        height: 100%;
         grid-area: cam;
         border-radius: var(--radius-md);
     }
@@ -894,28 +891,26 @@ canvas#gameCanvas {
 
     .panel-info {
         grid-area: info;
-        justify-content: flex-end; /* 🌟 ดันกล่องสถานะลงไปเรียงชิดด้านล่าง */
+        justify-content: flex-end;
         gap: 15px;
     }
 
-/* แยกตั้งค่ากล่องบอกท่าทาง (Legend) */
     .legend-box {
         display: flex;
-        justify-content: center; /* จับข้อความมารวมกันตรงกลาง */
+        justify-content: center;
         align-items: center;
-        gap: 14px; /* ระยะห่างระหว่างท่า */
+        gap: 14px;
         width: 100%;
         box-sizing: border-box;
-        padding: 14px 10px; /* ลดกรอบด้านข้างลง เผื่อที่ให้ข้อความ */
+        padding: 14px 10px;
         border-radius: var(--radius-md);
         background: rgba(255, 255, 255, 0.04);
         border: 1px solid var(--glass-border);
     }
 
-    /* แยกตั้งค่ากล่องเวลาและคะแนน (Status) */
     .status-box {
         display: flex;
-        justify-content: space-between; /* ให้เวลาและคะแนนกระจายซ้ายขวาเหมือนเดิม */
+        justify-content: space-between;
         align-items: center;
         width: 100%;
         box-sizing: border-box;
@@ -924,8 +919,8 @@ canvas#gameCanvas {
     }
 
     .legend-item {
-        font-size: 16px; /* ลดฟอนต์ลงจาก 15px เพื่อไม่ให้ล้นขอบ */
-        white-space: nowrap; /* บังคับไม่ให้ข้อความตัดขึ้นบรรทัดใหม่ */
+        font-size: 16px;
+        white-space: nowrap;
     }
 
     .stat-label {
@@ -976,12 +971,12 @@ canvas#gameCanvas {
    ----------------------------------------------------- */
 .pose-gallery-section {
     width: 100%;
-    max-width: 700px; /* จำกัดความกว้างไม่ให้ใหญ่เทอะทะบนจอคอม */
+    max-width: 700px;
     margin: 10px auto 30px auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 15px; /* เผื่อขอบซ้ายขวาไม่ให้ชิดจอเกินไป */
+    padding: 0 15px;
     box-sizing: border-box;
 }
 
@@ -996,9 +991,9 @@ canvas#gameCanvas {
 .pose-row {
     display: flex;
     justify-content: center;
-    gap: 20px; /* ระยะห่างปรับให้ยืดหยุ่น */
+    gap: 20px;
     width: 100%;
-    flex-wrap: wrap; /* ป้องกันการทะลุขอบบนจอมือถือที่เล็กมากๆ */
+    flex-wrap: wrap;
 }
 
 .pose-card {
@@ -1011,10 +1006,9 @@ canvas#gameCanvas {
     align-items: center;
     gap: 12px;
     
-    /* 🌟 เปลี่ยนมาใช้ % เพื่อให้ย่อขยายตามหน้าจออัตโนมัติ */
     width: calc(50% - 10px); 
-    max-width: 170px; /* ล็อกความใหญ่สูงสุด */
-    min-width: 125px; /* ล็อกความเล็กต่ำสุด */
+    max-width: 170px;
+    min-width: 125px;
     
     box-sizing: border-box;
     backdrop-filter: blur(10px);
@@ -1022,7 +1016,6 @@ canvas#gameCanvas {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* 🌟 ตั้งค่าให้ท่า "ยืดแขนตรง" ที่อยู่บนสุดใหญ่กว่าเพื่อนเล็กน้อย และอยู่ตรงกลางเดี่ยวๆ */
 .pose-row:first-child .pose-card {
     width: 100%;
     max-width: 200px; 
@@ -1036,7 +1029,7 @@ canvas#gameCanvas {
 
 .pose-gallery-img {
     width: 100%;
-    aspect-ratio: 3 / 4; /* ล็อกสัดส่วนแนวตั้ง */
+    aspect-ratio: 3 / 4;
     object-fit: cover; 
     border-radius: var(--radius-sm);
     background: rgba(0, 0, 0, 0.5); 
@@ -1045,34 +1038,30 @@ canvas#gameCanvas {
 
 .pose-name {
     font-family: 'Kanit', sans-serif;
-    /* 🌟 ใช้ฟังก์ชัน clamp เพื่อให้ฟอนต์หดเล็กลงเองเมื่อจอมือถือเล็ก และใหญ่ขึ้นเมื่อจอคอมใหญ่ */
     font-size: clamp(12px, 3.5vw, 15px); 
     font-weight: 600;
     text-align: center;
-    white-space: nowrap; /* ห้ามคำตัดตกบรรทัด */
+    white-space: nowrap; 
 }
 
-/* สีข้อความให้ตรงกับสีเลน */
 .pose-yellow { color: var(--note-yellow); text-shadow: 0 0 10px rgba(255, 210, 63, 0.3); }
 .pose-blue { color: var(--note-blue); text-shadow: 0 0 10px rgba(41, 197, 255, 0.3); }
 .pose-red { color: var(--note-red); text-shadow: 0 0 10px rgba(255, 45, 85, 0.3); }
 
-/* -----------------------------------------------------
-   Responsive Rules สำหรับมือถือขนาดเล็กมาก (ต่ำกว่า 480px)
-   ----------------------------------------------------- */
+
 @media (max-width: 480px) {
     .pose-gallery {
-        gap: 16px; /* ลดช่องว่างระหว่างแถวลง */
+        gap: 16px;
     }
 
     .pose-row {
-        gap: 12px; /* ลดช่องว่างระหว่างกล่องซ้ายขวาลง */
+        gap: 12px;
     }
 
     .pose-card {
         padding: 8px;
         gap: 8px;
         border-radius: var(--radius-sm);
-        width: calc(50% - 6px); /* เบียดกล่องให้ชิดกันขึ้นในแนวนอน */
+        width: calc(50% - 6px);
     }
 }

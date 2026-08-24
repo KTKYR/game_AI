@@ -127,15 +127,12 @@ async function init() {
 
 function predictLoop() {
     if (isCameraReady) {
-        // 1. ดึงภาพใหม่จากเว็บแคมและวาดขึ้นจอทันที (ลื่นไหล 60FPS โดยไม่รอ AI)
         webcam.update();
         drawCamera(latestPose);
 
-        // 2. ให้ AI ประมวลผลแยกต่างหากแบบขนานกันไป
         if (!isPredicting) {
             isPredicting = true;
             
-            // ใช้ IIFE (ฟังก์ชันแบบเรียกใช้ตัวเอง) เพื่อให้ทำงานแบบ Async โดยไม่บล็อกลูปหลัก
             (async () => {
                 try {
                     const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
@@ -149,7 +146,7 @@ function predictLoop() {
                     }
 
                     currentPose = bestPred.probability > CONFIDENCE_LIMIT ? bestPred.className.toLowerCase() : "none";
-                    latestPose = pose; // เก็บโครงกระดูกล่าสุดไปให้กล้องวาด
+                    latestPose = pose;
 
                     let displayPoseName = currentPose;
                     if (currentPose !== "none") {
@@ -164,13 +161,12 @@ function predictLoop() {
                 } catch (error) {
                     console.error("เกิดข้อผิดพลาดในการประมวลผล AI:", error);
                 } finally {
-                    isPredicting = false; // ปลดล็อกให้ AI พร้อมรับภาพใหม่ในรอบถัดไป
+                    isPredicting = false;
                 }
             })();
         }
     }
     
-    // สั่งรันเฟรมของกล้องต่อไปทันที
     predictAnimationFrameId = window.requestAnimationFrame(predictLoop);
 }
 
@@ -222,8 +218,8 @@ function spawnNote() {
     lastSpawnLane = selectedConfig.lane;
 
     // 🎲 สุ่มความยาวของบาร์ (สั้นสุด 70px / ยาวสุด 220px)
-    const minLength = 70;  // ความยาวบาร์สั้นสุด
-    const maxLength = 220; // ความยาวบาร์ยาวสุด
+    const minLength = 70;
+    const maxLength = 220;
     const noteLength = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
     
     activeNotes.push({
@@ -259,10 +255,9 @@ function updateGame() {
  
     let currentTimeMs = Date.now();
     
-    // ตรวจสอบว่าเวลาปัจจุบัน ห่างจากตอนปล่อยบล็อกล่าสุดเกิน 4000 มิลลิวินาที (4 วินาที) หรือยัง
     if (currentTimeMs - lastNoteSpawnTime >= 4000) {
         spawnNote();
-        lastNoteSpawnTime = currentTimeMs; // อัปเดตเวลาที่ปล่อยบล็อกไปล่าสุด
+        lastNoteSpawnTime = currentTimeMs;
     }
 
     const laneWidth = gameCanvas.width / 3;
@@ -270,7 +265,7 @@ function updateGame() {
 
     for (let i = activeNotes.length - 1; i >= 0; i--) {
         let note = activeNotes[i];
-        note.y += 5; // ความเร็วของบาร์
+        note.y += 5;
 
         let noteBottom = note.y;
         let noteTop = note.y - note.length;
