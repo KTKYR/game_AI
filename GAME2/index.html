@@ -4,18 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Symphony Pose - Stretch Rhythm Game</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700;800&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="header">
-        <img src="Logo Template.svg" alt="logo">
-    </div>
 
+    <!-- แสงพื้นหลังแบบเวทีคอนเสิร์ต (ตกแต่งอย่างเดียว ไม่กระทบการทำงาน) -->
+    <div class="stage-glow" aria-hidden="true"></div>
+
+    <!-- ===================================================
+         ส่วนที่ 1: หน้าแรก / ชื่อเว็บไซต์
+         =================================================== -->
+    <header class="hero" id="top">
+        <img class="hero-logo" src="Logo Template.png" alt="Symphony Pose logo">
+        <p class="hero-eyebrow">AI POSE · RHYTHM GAME</p>
+        <h1 class="hero-title">SYMPHONY POSE</h1>
+        <p class="hero-desc">เกมจังหวะที่ใช้ท่าทางร่างกายผ่านกล้อง ขับเคลื่อนด้วย AI จาก Teachable Machine<br>
+            ยืดเส้นยืดสาย ไปพร้อมกับจังหวะเพลงที่คุณเลือกเอง</p>
+        <a href="#how-to-play" class="hero-cta">วิธีการเล่น <span class="hero-cta-arrow">↓</span></a>
+    </header>
+
+    <!-- ===================================================
+         ส่วนที่ 2: แนะนำวิธีการเล่น
+         =================================================== -->
+    <section class="how-to-play" id="how-to-play">
+        <p class="section-eyebrow">HOW TO PLAY</p>
+        <h2 class="section-title">วิธีการเล่นและระบบสีโน้ต</h2>
+        <p class="section-intro">
+            สังเกตเลนและสีของบล็อกโน้ตที่ตกลงมา แล้วทำท่าทางให้ถูกต้องในจังหวะที่โน้ตตกลงมาถึง <strong>Hit Zone</strong> (กรอบด้านล่างของจอเกม)
+        </p>
+
+        <div class="lane-grid">
+            <div class="lane-card">
+                <p class="lane-card-label">เลนซ้าย</p>
+                <div class="pose-chip pose-chip-red">🟥 บล็อกสีแดง — ยืดแขนด้านซ้าย</div>
+                <div class="pose-chip pose-chip-blue">🟦 บล็อกสีน้ำเงิน — เอียงคอด้านซ้าย</div>
+            </div>
+            <div class="lane-card">
+                <p class="lane-card-label">เลนกลาง</p>
+                <div class="pose-chip pose-chip-yellow">🟨 บล็อกสีเหลือง — ยืดแขนตรงๆ</div>
+            </div>
+            <div class="lane-card">
+                <p class="lane-card-label">เลนขวา</p>
+                <div class="pose-chip pose-chip-red">🟥 บล็อกสีแดง — ยืดแขนด้านขวา</div>
+                <div class="pose-chip pose-chip-blue">🟦 บล็อกสีน้ำเงิน — เอียงคอด้านขวา</div>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <p class="info-card-title">⏱️ Short Note</p>
+                <p class="info-card-text">ทำท่าทางให้ตรงจังหวะใน Hit Zone แค่ช่วงสั้น ๆ แล้วจบ</p>
+            </div>
+            <div class="info-card">
+                <p class="info-card-title">📏 Long Note</p>
+                <p class="info-card-text">ทำท่าทางให้ตรง แล้วค้างท่าไว้จนกว่าบล็อกจะไหลผ่านไปหมด</p>
+            </div>
+            <div class="info-card info-card-warning">
+                <p class="info-card-title">⚠️ เงื่อนไข Game Over</p>
+                <p class="info-card-text">ทำท่าไม่ตรงกับสี/เลน หรือทำท่าไม่ทันจนโน้ตหลุดกรอบ Hit Zone เกมจะหยุดทันที</p>
+            </div>
+        </div>
+
+        <a href="#game" class="hero-cta">เริ่มเล่นเกม <span class="hero-cta-arrow">↓</span></a>
+    </section>
+
+    <!-- ===================================================
+         ส่วนที่ 3: ตัวเกม (โค้ด/ฟังก์ชันเดิมทั้งหมด ไม่เปลี่ยนแปลง)
+         =================================================== -->
+    <section class="game-section" id="game">
     <div class="game-container">
         <div class="canvas-section">
 
             <!-- 1. กล้องเว็บแคม -->
             <div class="camera-thumb">
+                <span class="live-badge"><span class="live-dot"></span>LIVE</span>
                 <canvas id="cameraCanvas" width="300" height="300"></canvas>
                 <div id="loadingText">รอเชื่อมต่อกล้อง...</div>
             </div>
@@ -23,15 +90,24 @@
             <!-- 2. ข้อมูลคำอธิบายท่า และ สถานะเกม -->
             <div class="panel-info">
                 <div class="legend-box">
-                    <span>🔴 ยืดแขน(ซ้าย/ขวา)</span>
-                    <span>🟡 ชูแขนตรง </span>
-                    <span>🔵 เอียงคอ(ซ้าย/ขวา)</span>
+                    <span class="legend-item legend-red">🔴 ยืดแขน(ซ้าย/ขวา)</span>
+                    <span class="legend-item legend-yellow">🟡 ชูแขนตรง</span>
+                    <span class="legend-item legend-blue">🔵 เอียงคอ(ซ้าย/ขวา)</span>
                 </div>
 
                 <div class="status-box">
-                    <div>เวลา: <span id="timeDisplay">0.0</span>s</div>
-                    <div>คะแนน: <span id="scoreDisplay">0</span></div>
-                    <div>ท่า: <span id="poseDisplay">-</span></div>
+                    <div class="stat-cell">
+                        <span class="stat-label">เวลา</span>
+                        <span class="stat-value"><span id="timeDisplay">0.0</span>s</span>
+                    </div>
+                    <div class="stat-cell">
+                        <span class="stat-label">คะแนน</span>
+                        <span class="stat-value" id="scoreDisplay">0</span>
+                    </div>
+                    <div class="stat-cell">
+                        <span class="stat-label">ท่า</span>
+                        <span class="stat-value" id="poseDisplay">-</span>
+                    </div>
                 </div>
             </div>
 
@@ -41,6 +117,7 @@
 
                 <!-- หน้าต่างเมนู/จบเกม -->
                 <div id="gameMenuScreen" class="overlay">
+                    <p class="menu-eyebrow">SYMPHONY POSE</p>
                     <h2 id="menuTitle">พร้อมยืดเส้นหรือยัง?</h2>
 
                     <div id="gameOverStats" class="hidden">
@@ -56,12 +133,13 @@
                     </div>
 
                     <button id="mainActionBtn" onclick="handleMenuAction()">เริ่มเกม</button>
-                    <p id="menuLoadingText" class="hidden" style="color: #fee440; margin-top: 15px;">กำลังเชื่อมต่อ AI และกล้อง... ⏳</p>
+                    <p id="menuLoadingText" class="hidden">กำลังเชื่อมต่อ AI และกล้อง... ⏳</p>
                 </div>
             </div>
 
         </div>
     </div>
+    </section>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8.3/dist/teachablemachine-pose.min.js"></script>
