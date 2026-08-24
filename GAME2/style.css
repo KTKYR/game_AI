@@ -970,3 +970,86 @@ canvas#gameCanvas {
         padding: 14px 18px;
     }
 }
+
+/* -----------------------------------------------------
+   Pose Gallery Section (รวมรูปภาพทั้ง 5 ท่า)
+   ----------------------------------------------------- */
+.pose-gallery-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.pose-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    align-items: center;
+}
+
+.pose-row {
+    display: flex;
+    justify-content: center;
+    gap: 30px; /* ระยะห่างระหว่าง 2 รูปในแนวนอน */
+    width: 100%;
+}
+
+.pose-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 160px; /* ขนาดความกว้างของแต่ละกรอบรูป */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pose-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.pose-gallery-img {
+    width: 100%;
+    aspect-ratio: 3 / 4; /* ล็อกสัดส่วนรูปเป็นแนวตั้ง (Portrait) */
+    object-fit: cover; /* จัดการรูปที่มีพื้นหลังให้เต็มกรอบโดยไม่บี้แบน */
+    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.5); /* สีพื้นหลังสำรองระหว่างโหลดรูป */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.pose-name {
+    font-family: 'Kanit', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* สีข้อความให้ตรงกับสีเลน */
+.pose-yellow { color: var(--note-yellow); text-shadow: 0 0 10px rgba(255, 210, 63, 0.3); }
+.pose-blue { color: var(--note-blue); text-shadow: 0 0 10px rgba(41, 197, 255, 0.3); }
+.pose-red { color: var(--note-red); text-shadow: 0 0 10px rgba(255, 45, 85, 0.3); }
+
+/* การแสดงผลบนจอมือถือ (ย่อส่วนลงเล็กน้อยให้พอดีจอ) */
+@media (max-width: 480px) {
+    .pose-row {
+        gap: 15px;
+    }
+    .pose-card {
+        width: 135px;
+        padding: 10px;
+    }
+    .pose-name {
+        font-size: 13px;
+    }
+}
