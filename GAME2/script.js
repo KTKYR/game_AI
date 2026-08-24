@@ -67,7 +67,6 @@ function initSongs() {
 
         btn.innerHTML = `
             <span class="song-name">${song.name}</span>
-            <span class="song-bpm">⏱️ ${song.bpm} BPM</span>
         `;
 
         container.appendChild(btn);
