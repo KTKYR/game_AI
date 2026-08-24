@@ -834,34 +834,43 @@ canvas#gameCanvas {
    ----------------------------------------------------- */
 @media (min-width: 1280px) {
     .game-section {
-        padding: 30px;
+        height: 100vh; /* บังคับความสูงเท่าหน้าจอเป๊ะ */
+        padding: 4vh 20px; /* ขอบบนล่างยืดหยุ่นตาม % ของจอ */
+        box-sizing: border-box;
+        overflow: hidden; /* ล็อกไม่ให้มีแถบ Scroll เลื่อนขึ้นลง */
     }
 
     .game-container {
         width: 100%;
-        height: 88vh;
-        max-height: 900px;
+        height: 100%;
         display: flex;
         justify-content: center;
+        align-items: center; /* จัดให้อยู่กึ่งกลางจอเป๊ะ */
     }
 
-    .canvas-section {
+.canvas-section {
         width: 100%;
-        max-width: 1200px;
+        /* 🌟 1. ขยายความกว้างสูงสุดจาก 1100px เป็น 1350px เพื่อให้กางออกด้านข้างได้อีก */
+        max-width: 1200px; 
         height: 100%;
+        max-height: 88vh; 
         box-sizing: border-box;
-        padding: 22px;
-        grid-template-columns: 500px 1fr;
-        grid-template-rows: 420px 1fr;
+        padding: 24px;
+        
+        /* 🌟 2. ขยายขนาดฝั่งกล้อง (จาก 460px เป็น 540px) 
+           ส่วนเกม (1fr) จะขยายกว้างขึ้นอัตโนมัติตามพื้นที่ที่เหลือ */
+        grid-template-columns: 480px 1fr; 
+        grid-template-rows: 1fr auto; 
         grid-template-areas:
             "cam game"
             "info game";
-        gap: 22px;
+        gap: 26px; /* ขยับระยะห่างตรงกลางให้กว้างขึ้นอีกนิดเพื่อให้ดูไม่อึดอัด */
     }
 
     .camera-thumb {
         width: 100%;
-        height: 100%;
+        height: 100%; /* 🌟 สั่งให้กล้องยืดเต็มความสูงที่เหลืออยู่ */
+        /* ลบ aspect-ratio ออก เพื่อปลดล็อกความสูง */
         grid-area: cam;
         border-radius: var(--radius-md);
     }
@@ -885,31 +894,47 @@ canvas#gameCanvas {
 
     .panel-info {
         grid-area: info;
-        justify-content: flex-start;
+        justify-content: flex-end; /* 🌟 ดันกล่องสถานะลงไปเรียงชิดด้านล่าง */
         gap: 15px;
     }
 
-    .legend-box, .status-box {
+/* แยกตั้งค่ากล่องบอกท่าทาง (Legend) */
+    .legend-box {
         display: flex;
-        justify-content: space-between;
+        justify-content: center; /* จับข้อความมารวมกันตรงกลาง */
+        align-items: center;
+        gap: 14px; /* ระยะห่างระหว่างท่า */
+        width: 100%;
+        box-sizing: border-box;
+        padding: 14px 10px; /* ลดกรอบด้านข้างลง เผื่อที่ให้ข้อความ */
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--glass-border);
+    }
+
+    /* แยกตั้งค่ากล่องเวลาและคะแนน (Status) */
+    .status-box {
+        display: flex;
+        justify-content: space-between; /* ให้เวลาและคะแนนกระจายซ้ายขวาเหมือนเดิม */
         align-items: center;
         width: 100%;
         box-sizing: border-box;
         padding: 16px 20px;
-        font-size: 15px;
         border-radius: var(--radius-md);
     }
 
     .legend-item {
-        font-size: 15px;
+        font-size: 16px; /* ลดฟอนต์ลงจาก 15px เพื่อไม่ให้ล้นขอบ */
+        white-space: nowrap; /* บังคับไม่ให้ข้อความตัดขึ้นบรรทัดใหม่ */
     }
 
     .stat-label {
-        font-size: 10px;
+        font-size: 14px;
     }
 
     .stat-value {
-        font-size: 20px;
+        font-size: 24px;
+        white-space: nowrap;
     }
 
     .game-view {
