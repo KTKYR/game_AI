@@ -369,7 +369,7 @@ function drawGame() {
         ctx.shadowColor = "rgba(0,0,0,0.6)";
         ctx.shadowBlur = 4;
         ctx.fillText(note.label, x + (noteWidth / 2), noteTop + (note.length / 2));
-        ctx.shadowBlur = 0;
+        ctx.shadowBlur = 0; 
     }
 }
 
