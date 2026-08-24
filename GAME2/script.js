@@ -37,8 +37,8 @@ let audioPlayer = new Audio();
 // audioPlayer.crossOrigin = "anonymous";
 
 let songList = [
-    { name: "🎵 ถิ่นชงโค", url: "./mp3/thinchongkho.mp3"},
-    { name: "🎵 Boy Don't Cry", url: "./mp3/Boys_Dont_Cry.mp3" }
+    { name: "🎵 ถิ่นชงโค", url: "./mp3/thinchongkho.mp3", BPM : 120},
+    { name: "🎵 Boy Don't Cry", url: "./mp3/Boys_Dont_Cry.mp3", BPM : 120 }
 ];
 let currentSongIndex = 0;
 let nextSpawnTime = 0;
