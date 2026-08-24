@@ -37,12 +37,12 @@ let audioPlayer = new Audio();
 // audioPlayer.crossOrigin = "anonymous";
 
 let songList = [
-    { name: "🎵 ถิ่นชงโค", url: "./mp3/thinchongkho.mp3", BPM : 120},
-    { name: "🎵 Boy Don't Cry", url: "./mp3/Boys_Dont_Cry.mp3", BPM : 120 }
+    { name: "🎵 ถิ่นชงโค", url: "./mp3/thinchongkho.mp3"},
+    { name: "🎵 Boy Don't Cry", url: "./mp3/Boys_Dont_Cry.mp3"}
 ];
 let currentSongIndex = 0;
 let nextSpawnTime = 0;
-let secondsPerBeat = 0;
+// let secondsPerBeat = 0;
 
 audioPlayer.onerror = function () {
     console.warn("⚠️ ไม่สามารถเล่นเสียงจากลิงก์นี้ได้ ระบบสลับไปใช้เสียงสำรองชั่วคราว");
@@ -172,7 +172,7 @@ function startGame() {
         console.warn("Autoplay ถูกบล็อกหรือลิงก์เพลงมีปัญหา:", error);
     });
 
-    secondsPerBeat = 60 / song.bpm;
+    // secondsPerBeat = 60 / song.bpm;
     nextSpawnTime = 3.0;
 
     startTime = Date.now();
