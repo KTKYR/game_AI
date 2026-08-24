@@ -9,6 +9,8 @@ let currentPose = "none";
 let isCameraReady = false;
 let isModelLoaded = false;
 let predictAnimationFrameId = null;
+let latestPose = null; 
+let isPredicting = false;
 let gameAnimationFrameId = null;
 
 const POSE_MAP = [
@@ -43,6 +45,7 @@ let songList = [
 let currentSongIndex = 0;
 let nextSpawnTime = 0;
 // let secondsPerBeat = 0;
+let lastNoteSpawnTime = 0;
 
 audioPlayer.onerror = function () {
     console.warn("⚠️ ไม่สามารถเล่นเสียงจากลิงก์นี้ได้ ระบบสลับไปใช้เสียงสำรองชั่วคราว");
@@ -122,26 +125,44 @@ async function init() {
     }
 }
 
-async function predictLoop() {
+function predictLoop() {
     if (isCameraReady) {
+        // 1. ดึงภาพใหม่จากเว็บแคมและวาดขึ้นจอทันที (ลื่นไหล 60FPS โดยไม่รอ AI)
         webcam.update();
-        const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-        const prediction = await model.predict(posenetOutput);
+        drawCamera(latestPose);
 
-        let bestPred = prediction[0];
-        for (let i = 1; i < prediction.length; i++) {
-            if (prediction[i].probability > bestPred.probability) {
-                bestPred = prediction[i];
-            }
+        // 2. ให้ AI ประมวลผลแยกต่างหากแบบขนานกันไป
+        if (!isPredicting) {
+            isPredicting = true;
+            
+            // ใช้ IIFE (ฟังก์ชันแบบเรียกใช้ตัวเอง) เพื่อให้ทำงานแบบ Async โดยไม่บล็อกลูปหลัก
+            (async () => {
+                try {
+                    const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
+                    const prediction = await model.predict(posenetOutput);
+
+                    let bestPred = prediction[0];
+                    for (let i = 1; i < prediction.length; i++) {
+                        if (prediction[i].probability > bestPred.probability) {
+                            bestPred = prediction[i];
+                        }
+                    }
+
+                    currentPose = bestPred.probability > CONFIDENCE_LIMIT ? bestPred.className.toLowerCase() : "none";
+                    latestPose = pose; // เก็บโครงกระดูกล่าสุดไปให้กล้องวาด
+
+                    const poseDisplay = document.getElementById("poseDisplay");
+                    if (poseDisplay) poseDisplay.innerText = currentPose;
+                } catch (error) {
+                    console.error("เกิดข้อผิดพลาดในการประมวลผล AI:", error);
+                } finally {
+                    isPredicting = false; // ปลดล็อกให้ AI พร้อมรับภาพใหม่ในรอบถัดไป
+                }
+            })();
         }
-
-        currentPose = bestPred.probability > CONFIDENCE_LIMIT ? bestPred.className.toLowerCase() : "none";
-
-        const poseDisplay = document.getElementById("poseDisplay");
-        if (poseDisplay) poseDisplay.innerText = currentPose;
-
-        drawCamera(pose);
     }
+    
+    // สั่งรันเฟรมของกล้องต่อไปทันที
     predictAnimationFrameId = window.requestAnimationFrame(predictLoop);
 }
 
@@ -173,7 +194,8 @@ function startGame() {
     });
 
     // secondsPerBeat = 60 / song.bpm;
-    nextSpawnTime = 3.0;
+    // nextSpawnTime = 4.0;
+    lastNoteSpawnTime = Date.now() - 4000;
 
     startTime = Date.now();
     document.getElementById("gameMenuScreen").classList.add("hidden");
@@ -226,11 +248,13 @@ function updateGame() {
         return;
     }
 
-    let checkTime = (audioPlayer.paused || audioPlayer.currentTime === 0) ? (Date.now() - startTime) / 1000 : audioPlayer.currentTime;
-
-    if (checkTime >= nextSpawnTime) {
+ 
+    let currentTimeMs = Date.now();
+    
+    // ตรวจสอบว่าเวลาปัจจุบัน ห่างจากตอนปล่อยบล็อกล่าสุดเกิน 4000 มิลลิวินาที (4 วินาที) หรือยัง
+    if (currentTimeMs - lastNoteSpawnTime >= 4000) {
         spawnNote();
-        nextSpawnTime += 3.0;
+        lastNoteSpawnTime = currentTimeMs; // อัปเดตเวลาที่ปล่อยบล็อกไปล่าสุด
     }
 
     const laneWidth = gameCanvas.width / 3;
