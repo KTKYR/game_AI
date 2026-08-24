@@ -972,21 +972,23 @@ canvas#gameCanvas {
 }
 
 /* -----------------------------------------------------
-   Pose Gallery Section (รวมรูปภาพทั้ง 5 ท่า)
+   Pose Gallery Section (ฉบับ Responsive 100%)
    ----------------------------------------------------- */
 .pose-gallery-section {
     width: 100%;
+    max-width: 700px; /* จำกัดความกว้างไม่ให้ใหญ่เทอะทะบนจอคอม */
+    margin: 10px auto 30px auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 10px;
-    margin-bottom: 20px;
+    padding: 0 15px; /* เผื่อขอบซ้ายขวาไม่ให้ชิดจอเกินไป */
+    box-sizing: border-box;
 }
 
 .pose-gallery {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
     width: 100%;
     align-items: center;
 }
@@ -994,8 +996,9 @@ canvas#gameCanvas {
 .pose-row {
     display: flex;
     justify-content: center;
-    gap: 30px; /* ระยะห่างระหว่าง 2 รูปในแนวนอน */
+    gap: 20px; /* ระยะห่างปรับให้ยืดหยุ่น */
     width: 100%;
+    flex-wrap: wrap; /* ป้องกันการทะลุขอบบนจอมือถือที่เล็กมากๆ */
 }
 
 .pose-card {
@@ -1007,10 +1010,22 @@ canvas#gameCanvas {
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    width: 160px; /* ขนาดความกว้างของแต่ละกรอบรูป */
+    
+    /* 🌟 เปลี่ยนมาใช้ % เพื่อให้ย่อขยายตามหน้าจออัตโนมัติ */
+    width: calc(50% - 10px); 
+    max-width: 170px; /* ล็อกความใหญ่สูงสุด */
+    min-width: 125px; /* ล็อกความเล็กต่ำสุด */
+    
+    box-sizing: border-box;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 🌟 ตั้งค่าให้ท่า "ยืดแขนตรง" ที่อยู่บนสุดใหญ่กว่าเพื่อนเล็กน้อย และอยู่ตรงกลางเดี่ยวๆ */
+.pose-row:first-child .pose-card {
+    width: 100%;
+    max-width: 200px; 
 }
 
 .pose-card:hover {
@@ -1021,18 +1036,20 @@ canvas#gameCanvas {
 
 .pose-gallery-img {
     width: 100%;
-    aspect-ratio: 3 / 4; /* ล็อกสัดส่วนรูปเป็นแนวตั้ง (Portrait) */
-    object-fit: cover; /* จัดการรูปที่มีพื้นหลังให้เต็มกรอบโดยไม่บี้แบน */
+    aspect-ratio: 3 / 4; /* ล็อกสัดส่วนแนวตั้ง */
+    object-fit: cover; 
     border-radius: var(--radius-sm);
-    background: rgba(0, 0, 0, 0.5); /* สีพื้นหลังสำรองระหว่างโหลดรูป */
+    background: rgba(0, 0, 0, 0.5); 
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .pose-name {
     font-family: 'Kanit', sans-serif;
-    font-size: 15px;
+    /* 🌟 ใช้ฟังก์ชัน clamp เพื่อให้ฟอนต์หดเล็กลงเองเมื่อจอมือถือเล็ก และใหญ่ขึ้นเมื่อจอคอมใหญ่ */
+    font-size: clamp(12px, 3.5vw, 15px); 
     font-weight: 600;
     text-align: center;
+    white-space: nowrap; /* ห้ามคำตัดตกบรรทัด */
 }
 
 /* สีข้อความให้ตรงกับสีเลน */
@@ -1040,16 +1057,22 @@ canvas#gameCanvas {
 .pose-blue { color: var(--note-blue); text-shadow: 0 0 10px rgba(41, 197, 255, 0.3); }
 .pose-red { color: var(--note-red); text-shadow: 0 0 10px rgba(255, 45, 85, 0.3); }
 
-/* การแสดงผลบนจอมือถือ (ย่อส่วนลงเล็กน้อยให้พอดีจอ) */
+/* -----------------------------------------------------
+   Responsive Rules สำหรับมือถือขนาดเล็กมาก (ต่ำกว่า 480px)
+   ----------------------------------------------------- */
 @media (max-width: 480px) {
+    .pose-gallery {
+        gap: 16px; /* ลดช่องว่างระหว่างแถวลง */
+    }
+
     .pose-row {
-        gap: 15px;
+        gap: 12px; /* ลดช่องว่างระหว่างกล่องซ้ายขวาลง */
     }
+
     .pose-card {
-        width: 135px;
-        padding: 10px;
-    }
-    .pose-name {
-        font-size: 13px;
+        padding: 8px;
+        gap: 8px;
+        border-radius: var(--radius-sm);
+        width: calc(50% - 6px); /* เบียดกล่องให้ชิดกันขึ้นในแนวนอน */
     }
 }
