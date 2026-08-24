@@ -16,7 +16,7 @@ let gameAnimationFrameId = null;
 const POSE_MAP = [
     { lane: 0, id: "blue_left", color: "#29c5ff", poseName: "เอียงคอซ้าย", label: "เอียงคอซ้าย" },
     { lane: 0, id: "red_left", color: "#ff2d55", poseName: "ยืดแขนด้านซ้าย", label: "ยืดแขนซ้าย" },
-    { lane: 1, id: "yellow", color: "#ffd23f", poseName: "ยืดขึ้น", label: "ยืดขึ้น" },
+    { lane: 1, id: "yellow", color: "#ffd23f", poseName: "ยืดขึ้น", label: "ยืดแขนตรง" },
     { lane: 2, id: "blue_right", color: "#29c5ff", poseName: "เอียงคอขวา", label: "เอียงคอขวา" },
     { lane: 2, id: "red_right", color: "#ff2d55", poseName: "ยืดแขนด้านขวา", label: "ยืดแขนขวา" }
 ];
@@ -151,8 +151,16 @@ function predictLoop() {
                     currentPose = bestPred.probability > CONFIDENCE_LIMIT ? bestPred.className.toLowerCase() : "none";
                     latestPose = pose; // เก็บโครงกระดูกล่าสุดไปให้กล้องวาด
 
-                    const poseDisplay = document.getElementById("poseDisplay");
-                    if (poseDisplay) poseDisplay.innerText = currentPose;
+                    let displayPoseName = currentPose;
+                    if (currentPose !== "none") {
+                    const foundPose = POSE_MAP.find(p => p.poseName.toLowerCase() === currentPose);
+                    if (foundPose) {
+                        displayPoseName = foundPose.label; 
+                    }
+    }
+
+    const poseDisplay = document.getElementById("poseDisplay");
+    if (poseDisplay) poseDisplay.innerText = displayPoseName;
                 } catch (error) {
                     console.error("เกิดข้อผิดพลาดในการประมวลผล AI:", error);
                 } finally {
