@@ -38,7 +38,7 @@ let audioPlayer = new Audio();
 
 let songList = [
     { name: "🎵 ถิ่นชงโค", url: "./mp3/thinchongkho.mp3", bpm: 120 },
-    { name: "🎵 Boy Don't Cry", url: "./mp3/Boys Dont Cry.mp3", bpm: 120 }
+    { name: "🎵 Boy Don't Cry", url: "./mp3/Boys_Dont_Cry.mp3", bpm: 120 }
 ];
 let currentSongIndex = 0;
 let nextSpawnTime = 0;
